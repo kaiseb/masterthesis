@@ -1,3 +1,9 @@
+##### Learning about the gamlss - package #####
+
+#### Chapter 1 ####
+
+# Linear model 
+
 # Loading library
 library(gamlss)
 data(rent)
@@ -22,5 +28,46 @@ coef(l1)
 fitted(r1, "sigma")[1]
 summary(r1)
 Rsq(r1)
-
 plot(r1)
+
+
+# Generalized linear model
+
+r2 <- gamlss(R ~ Fl+A+H+loc, family=GA, data=rent)
+
+coef(r2)
+coef(r2, "sigma")
+deviance(r2)
+
+l2 <- glm(R ~ Fl+A+H+loc, family=Gamma(link="log"), data=rent) 
+coef(l2)
+deviance(l2)
+
+
+# Generalized additive model 
+
+r3 <- gamlss(R ~ pb(Fl)+pb(A)+H+loc, family=GA, data=rent, trace = FALSE) 
+summary(r3)       
+
+AIC(r2,r3)
+
+term.plot(r3, pages=1, ask=FALSE)
+wp(r3, ylim.all=.6)
+
+# Modeling sigma
+
+r4 <- gamlss(R ~ pb(Fl)+pb(A)+H+loc, 
+             sigma.fo=~pb(Fl)+pb(A)+H+loc, family=GA, data=rent, trace=FALSE)
+AIC(r3,r4)
+term.plot(r4, pages=1, what="sigma", ask=FALSE)
+drop1(r4, what="sigma")
+wp(r4, ylim.all=.6)
+
+
+# Generalized additive model for location, scale and shape
+
+r5 <- gamlss(R ~ pb(Fl)+pb(A)+H+loc, 
+             sigma.fo=~pb(Fl)+pb(A)+H+loc, 
+             nu.fo=~pb(Fl)+pb(A)+H+loc, 
+             family=BCCGo, data=rent, trace=FALSE)
+AIC(r4, r5)
